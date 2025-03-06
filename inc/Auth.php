@@ -223,17 +223,12 @@ class Auth {
 	 * @return string
 	 */
 	private function generate_unique_username( $base_username ) {
-		// Sanitize.
 		$base_username = sanitize_user( $base_username );
 
 		$numeric_suffix = 0;
 
 		do {
-			$username = ( 0 == $numeric_suffix )
-				?
-				$base_username
-				:
-				sprintf( '%s%s', $base_username, $numeric_suffix );
+			$username = ( 0 == $numeric_suffix ) ? $base_username : sprintf( '%s%s', $base_username, $numeric_suffix );
 
 			$numeric_suffix ++;
 		} while ( username_exists( $username ) );
