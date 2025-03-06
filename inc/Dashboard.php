@@ -72,41 +72,27 @@ class Dashboard {
 			}
 		}
 
-		$cache_killer = FREEMIUS_SSO_MEMBERS_DASHBOARD_DEBUG
-			?
-			// Clear cache every time on debug mode.
-			date( 'Y-m-d H:i:s' )
-			:
-			// Clear cache on an hourly basis.
-			date( 'Y-m-d H' );
+		$cache_killer = FREEMIUS_SSO_MEMBERS_DASHBOARD_DEBUG ? date( 'Y-m-d H:i:s' ) : date( 'Y-m-d H' );
 
 		$user_id      = null;
 		$access_token = null;
 
-		if ( is_user_logged_in() && class_exists( 'FS_SSO' ) ) {
+		if ( is_user_logged_in() ) {
 			$sso = Account::instance();
 
 			$user_id = $sso->get_freemius_user_id();
 
 			if ( is_numeric( $user_id ) ) {
 				$access_token = $sso->get_freemius_access_token();
-
-				$access_token = is_object( $access_token )
-					?
-					$access_token->access
-					:
-					null;
+				$access_token = is_object( $access_token ) ? $access_token->access : null;
 			}
 		}
 
 		$dashboard_params = array(
 			'css'        => $css,
+			'store_id'   => $store_id,
 			'public_key' => $public_key,
 		);
-
-		if ( is_numeric( $store_id ) ) {
-			$dashboard_params['store_id'] = $store_id;
-		}
 
 		if ( is_numeric( $product_id ) ) {
 			$dashboard_params['product_id'] = $product_id;
@@ -117,7 +103,7 @@ class Dashboard {
 			$dashboard_params['token']   = $access_token;
 		}
 
-		wp_enqueue_scripts( 'jquery' );
+		wp_enqueue_script( 'jquery' );
 
 		return apply_filters( 'fs_members_dashboard', '
 <script type="text/javascript" src="' . $this->get_dashboard_url() . '?ck=' . $cache_killer . '"></script>
