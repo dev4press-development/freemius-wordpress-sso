@@ -147,30 +147,34 @@ class Account {
 		$fs_user_id    = $this->get_freemius_user_id();
 		$fs_user_token = $this->get_freemius_access_token();
 
-		$result = API::instance()->fetch_user_store_licenses( $fs_user_id, $fs_user_token->access );
+		if ( isset( $fs_user_token->access ) ) {
+			$result = API::instance()->fetch_user_store_licenses( $fs_user_id, $fs_user_token->access );
 
-		if ( ! is_wp_error( $result ) ) {
-			$result = json_decode( $result['body'] );
+			if ( ! is_wp_error( $result ) ) {
+				$result = json_decode( $result['body'] );
 
-			if ( is_object( $result ) && ! isset( $result->error ) && ! empty( $result->licenses ) ) {
-				$has_any_licenses = 'yes';
+				if ( is_object( $result ) && ! isset( $result->error ) && ! empty( $result->licenses ) ) {
+					$has_any_licenses = 'yes';
+				}
 			}
-		}
 
-		update_user_meta( $this->ID, 'fs_has_licenses', $has_any_licenses );
+			update_user_meta( $this->ID, 'fs_has_licenses', $has_any_licenses );
+		}
 	}
 
 	public function refresh_active_user_licenses() {
 		$fs_user_id    = $this->get_freemius_user_id();
 		$fs_user_token = $this->get_freemius_access_token();
 
-		$result = API::instance()->fetch_user_store_licenses( $fs_user_id, $fs_user_token->access, 'active', PHP_INT_MAX );
+		if ( isset( $fs_user_token->access ) ) {
+			$result = API::instance()->fetch_user_store_licenses( $fs_user_id, $fs_user_token->access, 'active', PHP_INT_MAX );
 
-		if ( ! is_wp_error( $result ) ) {
-			$result = json_decode( $result['body'] );
+			if ( ! is_wp_error( $result ) ) {
+				$result = json_decode( $result['body'] );
 
-			if ( is_object( $result ) && ! isset( $result->error ) && is_array( $result->licenses ) && ! empty( $result->licenses ) ) {
-				update_user_meta( $this->ID, 'fs_active_licenses', $result->licenses );
+				if ( is_object( $result ) && ! isset( $result->error ) && is_array( $result->licenses ) && ! empty( $result->licenses ) ) {
+					update_user_meta( $this->ID, 'fs_active_licenses', $result->licenses );
+				}
 			}
 		}
 	}

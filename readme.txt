@@ -1,5 +1,5 @@
 === Freemius SSO (Single Sign-On) ===
-Contributors: freemius, svovaf
+Contributors: GDragoN, freemius, svovaf
 Plugin URI: https://freemius.com
 License: MIT
 License URI: https://opensource.org/licenses/mit
@@ -23,6 +23,10 @@ When embedding the User Dashboard (https://github.com/Freemius/freemius-users-da
 4. Done! Users will be able to login with their Freemius credentials.
 
 == Changelog ==
+
+=2.0=
+* Rewritten and split into classes
+* Add Dashboard integration shortcode
 
 =1.1.0=
 * Added integration with Freemius User Dashboard plugin.
