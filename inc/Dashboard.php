@@ -36,7 +36,7 @@ class Dashboard {
 
 	public function dashboard_shortcode( $atts = array() ) {
 		$store_id   = isset( $atts['store_id'] ) && is_numeric( $atts['store_id'] ) ? $atts['store_id'] : ( defined( 'FREEMIUS_SSO_STORE_ID' ) ? FREEMIUS_SSO_STORE_ID : null );
-		$public_key = isset( $atts['public_key'] ) && is_string( $atts['public_key'] ) ? $atts['public_key'] : ( defined( 'FREEMIUS_SSO_PUBLIC_KEY' ) ? FREEMIUS_SSO_PUBLIC_KEY : null );
+		$public_key = isset( $atts['public_key'] ) && is_string( $atts['public_key'] ) ? $atts['public_key'] : ( defined( 'FREEMIUS_SSO_DEVELOPER_PUBLIC_KEY' ) ? FREEMIUS_SSO_DEVELOPER_PUBLIC_KEY : null );
 
 		if ( ! is_numeric( $store_id ) || empty( $public_key ) ) {
 			return '<p style="font-weight: bold; color: red;">You have to specify the store_id and its public_key to embed the Freemius members dashboard securely to your site.</p>';

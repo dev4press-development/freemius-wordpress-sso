@@ -7,39 +7,42 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class Plugin {
-	#region Properties
+	private int $ID;
+	private string $bearer_token;
 
-	/** @var Plugin */
-	private static $INSTANCE;
+	/** @var Plugin[] */
+	private static array $INSTANCE = array();
 
-	#endregion
-
-	private function __construct() {
+	private function __construct( int $id, string $bearer_token ) {
+		$this->ID           = $id;
+		$this->bearer_token = $bearer_token;
 	}
 
-	public static function instance() : Plugin {
-		if ( ! isset( self::$INSTANCE ) ) {
-			self::$INSTANCE = new self();
+	public static function instance( int $id, string $bearer_token ) : Plugin {
+		if ( ! isset( self::$INSTANCE[ $id ] ) ) {
+			self::$INSTANCE[ $id ] = new self( $id, $bearer_token );
 		}
 
-		return self::$INSTANCE;
+		return self::$INSTANCE[ $id ];
 	}
 
-	/**
-	 * @param number $store_id
-	 * @param number $developer_id
-	 * @param string $developer_secret_key
-	 * @param bool   $use_localhost_api
-	 */
-	public function init(
-		$store_id,
-		$developer_id,
-		$developer_secret_key,
-		$use_localhost_api = false
-	) {
-		API::instance()->init( $store_id, $developer_id, $developer_secret_key, $use_localhost_api );
+	public function latest_release() {
+		return Store::instance()->latest_plugin_release( $this->ID, $this->bearer_token );
+	}
 
-		Auth::instance();
-		Dashboard::instance();
+	public function plans() {
+		return Store::instance()->plans( $this->ID, $this->bearer_token );
+	}
+
+	public function plan_pricing_id( $plan_id, $licenses ) {
+		$plans = Store::instance()->plan_pricing( $this->ID, $plan_id, $this->bearer_token );
+
+		foreach ( $plans['pricing'] as $pricing ) {
+			if ( ( $licenses == 0 && is_null( $pricing['licenses'] ) ) || ( $licenses > 0 && $pricing['licenses'] == $licenses ) ) {
+				return $pricing['id'];
+			}
+		}
+
+		return 0;
 	}
 }

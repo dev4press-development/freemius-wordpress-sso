@@ -11,9 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class Auth {
 	#region Properties
-
-	/** @var Auth */
-	private static $INSTANCE;
+	private static Auth $INSTANCE;
 
 	#endregion
 
@@ -40,14 +38,12 @@ class Auth {
 	 */
 	public function authenticate( $user, $username, $password ) {
 		$is_login_by_email = strpos( $username, '@' );
-		$wp_user_found     = ( $user instanceof WP_User );
+		$wp_user_found     = $user instanceof WP_User;
 
 		/**
 		 * If there's no matching user in WP and the login is by a username and not an email address, there's no way for us to fetch an access token for the user.
 		 */
-		if ( ! $wp_user_found &&
-		     ! $is_login_by_email
-		) {
+		if ( ! $wp_user_found && ! $is_login_by_email ) {
 			return $user;
 		}
 
@@ -63,11 +59,7 @@ class Auth {
 			return $user;
 		}
 
-		$email = $is_login_by_email
-			?
-			$username
-			:
-			$user->user_email;
+		$email = $is_login_by_email ? $username : $user->user_email;
 
 		$fs_user_token = null;
 		$fs_user_id    = null;
@@ -91,10 +83,7 @@ class Auth {
 
 		if ( $fetch_access_token ) {
 			// Fetch user's info and access token from Freemius.
-			$result = API::instance()->fetch_user_access_token(
-				$email,
-				( $wp_user_found ? '' : $password )
-			);
+			$result = API::instance()->fetch_user_access_token( $email, ( $wp_user_found ? '' : $password ) );
 
 			if ( is_wp_error( $result ) ) {
 				return $user;
@@ -222,7 +211,7 @@ class Auth {
 	 *
 	 * @return string
 	 */
-	private function generate_unique_username( $base_username ) {
+	private function generate_unique_username( string $base_username ) : string {
 		$base_username = sanitize_user( $base_username );
 
 		$numeric_suffix = 0;

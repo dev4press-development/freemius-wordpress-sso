@@ -9,7 +9,7 @@ If a user logs in with their Freemius credentials and there was no matching user
 define('FREEMIUS_SSO_STORE_ID', <Your_Freemius_Store_ID>);
 define('FREEMIUS_SSO_DEVELOPER_ID', <Your_Freemius_Developer_ID>);
 define('FREEMIUS_SSO_DEVELOPER_SECRET_KEY', '<Your_Freemius_Developer_Secret_Key>');
-define('FREEMIUS_SSO_PUBLIC_KEY', '<Your_Freemius_Public_key>');
+define('FREEMIUS_SSO_DEVELOPER_PUBLIC_KEY', '<Your_Freemius_Public_key>');
 ```
 
 ## Plugin installation

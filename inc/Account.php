@@ -9,18 +9,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Account {
 	#region Properties
 
-	/** @var int */
-	private $ID;
+	private int $ID;
 	/** @var Account[] */
-	private static $INSTANCE = array();
+	private static array $INSTANCE = array();
 
 	#endregion
 
-	private function __construct( $user_id ) {
+	private function __construct( int $user_id ) {
 		$this->ID = $user_id;
 	}
 
-	public static function instance( $user_id = null ) : Account {
+	public static function instance( int $user_id = null ) : Account {
 		if ( is_null( $user_id ) ) {
 			$user_id = get_current_user_id();
 		}
@@ -35,7 +34,7 @@ class Account {
 	/**
 	 * Clean up the stored user access token.
 	 */
-	public function clear_access_token() {
+	public function clear_access_token() : void {
 		delete_user_meta( $this->ID, 'fs_token' );
 	}
 
@@ -45,7 +44,7 @@ class Account {
 	 * @return number
 	 */
 	public function get_freemius_user_id() {
-		return get_user_meta( $this->ID, 'fs_user_id', true );
+		return absint( get_user_meta( $this->ID, 'fs_user_id', true ) );
 	}
 
 	/**
@@ -62,7 +61,7 @@ class Account {
 	 *
 	 * @return bool
 	 */
-	public function get_freemius_has_any_license() {
+	public function get_freemius_has_any_license() : bool {
 		return 'yes' === get_user_meta( $this->ID, 'fs_has_licenses', true );
 	}
 
@@ -71,16 +70,16 @@ class Account {
 	 *
 	 * @return bool
 	 */
-	public function get_freemius_has_any_active_license() {
+	public function get_freemius_has_any_active_license() : bool {
 		return 'yes' === get_user_meta( $this->ID, 'fs_has_active_licenses', true );
 	}
 
 	/**
 	 * Get user active licenses, reading value from the meta-entry.
 	 *
-	 * @return array
+	 * @return array|null
 	 */
-	public function get_freemius_active_licenses() {
+	public function get_freemius_active_licenses() : ?array {
 		$licenses = get_user_meta( $this->ID, 'fs_active_licenses', true );
 
 		if ( is_array( $licenses ) ) {
@@ -90,7 +89,7 @@ class Account {
 		return null;
 	}
 
-	public function refresh_user_access_token( $force = false ) {
+	public function refresh_user_access_token( $force = false ) : bool {
 		$fetch_access_token = false;
 
 		if ( $this->ID > 0 ) {
@@ -141,7 +140,7 @@ class Account {
 		return $fetch_access_token;
 	}
 
-	public function refresh_any_user_licenses() {
+	public function refresh_any_user_licenses() : void {
 		$has_any_licenses = 'no';
 
 		$fs_user_id    = $this->get_freemius_user_id();
@@ -162,20 +161,29 @@ class Account {
 		}
 	}
 
-	public function refresh_active_user_licenses() {
+	public function refresh_active_user_licenses() : void {
 		$fs_user_id    = $this->get_freemius_user_id();
 		$fs_user_token = $this->get_freemius_access_token();
 
 		if ( isset( $fs_user_token->access ) ) {
-			$result = API::instance()->fetch_user_store_licenses( $fs_user_id, $fs_user_token->access, 'active', PHP_INT_MAX );
+			$result = API::instance()->fetch_user_store_licenses( $fs_user_id, $fs_user_token->access, 'active' );
 
+			$has_any_active_licenses = 'no';
 			if ( ! is_wp_error( $result ) ) {
 				$result = json_decode( $result['body'] );
 
-				if ( is_object( $result ) && ! isset( $result->error ) && is_array( $result->licenses ) && ! empty( $result->licenses ) ) {
-					update_user_meta( $this->ID, 'fs_active_licenses', $result->licenses );
+				if ( is_object( $result ) && ! isset( $result->error ) ) {
+					if ( is_array( $result->licenses ) && ! empty( $result->licenses ) ) {
+						update_user_meta( $this->ID, 'fs_active_licenses', $result->licenses );
+
+						$has_any_active_licenses = 'yes';
+					} else {
+						update_user_meta( $this->ID, 'fs_active_licenses', array() );
+					}
 				}
 			}
+
+			update_user_meta( $this->ID, 'fs_has_active_licenses', $has_any_active_licenses );
 		}
 	}
 }

@@ -2,6 +2,8 @@
 
 namespace FreemiusSSO;
 
+use WP_Error;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -9,21 +11,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 class API {
 	#region Properties
 
-	/** @var number */
-	private $_store_id;
-	/** @var number */
-	private $_developer_id;
-	/** @var string */
-	private $_developer_secret_key;
-	/** @var bool */
-	private $_use_localhost_api;
-	/** @var Plugin */
-	private static $INSTANCE;
+	private int $_store_id;
+	private int $_developer_id;
+	private string $_developer_secret_key;
+	private bool $_use_localhost_api;
+
+	private static self $INSTANCE;
 
 	#endregion
 
 	private function __construct() {
-
 	}
 
 	public static function instance() : API {
@@ -34,38 +31,18 @@ class API {
 		return self::$INSTANCE;
 	}
 
-	/**
-	 * @param number $store_id
-	 * @param number $developer_id
-	 * @param string $developer_secret_key
-	 * @param bool   $use_localhost_api
-	 */
-	public function init(
-		$store_id,
-		$developer_id,
-		$developer_secret_key,
-		$use_localhost_api = false
-	) {
+	public function init( int $store_id, int $developer_id, string $developer_secret_key, bool $use_localhost_api = false ) : void {
 		$this->_store_id             = $store_id;
 		$this->_developer_id         = $developer_id;
 		$this->_developer_secret_key = $developer_secret_key;
 		$this->_use_localhost_api    = $use_localhost_api;
 	}
 
-	/**
-	 * @return string
-	 */
-	private function get_api_root() {
+	private function get_api_root() : string {
 		return $this->_use_localhost_api ? 'http://api.freemius-local.com:8080' : 'https://fast-api.freemius.com';
 	}
 
-	/**
-	 * @param string $email
-	 * @param string $password
-	 *
-	 * @return array|\WP_Error
-	 */
-	public function fetch_user_access_token( $email, $password = '' ) {
+	public function fetch_user_access_token( string $email, string $password = '' ) : WP_Error|array {
 		$api_root = $this->get_api_root();
 
 		// Fetch user's info and access token from Freemius.
@@ -85,15 +62,7 @@ class API {
 		);
 	}
 
-	/**
-	 * @param number $fs_user_id
-	 * @param string $access_token
-	 * @param string $type
-	 * @param int    $count
-	 *
-	 * @return array|\WP_Error
-	 */
-	public function fetch_user_store_licenses( $fs_user_id, $access_token, $type = 'all', $count = 1 ) {
+	public function fetch_user_store_licenses( int $fs_user_id, string $access_token, string $type = 'all', int $count = PHP_INT_MAX ) : WP_Error|array {
 		$api_root = $this->get_api_root();
 
 		// Fetch user's info and access token from Freemius.
@@ -111,12 +80,7 @@ class API {
 		);
 	}
 
-	/**
-	 * @param object $license
-	 *
-	 * @return bool
-	 */
-	public function has_license_expired( $license ) {
+	public function has_license_expired( $license ) : bool {
 		if ( is_null( $license->expiration ) ) {
 			// Lifetime license.
 			return false;
@@ -125,12 +89,7 @@ class API {
 		return ( time() >= $this->get_timestamp_from_datetime( $license->expiration ) );
 	}
 
-	/**
-	 * @param string $datetime
-	 *
-	 * @return int
-	 */
-	private function get_timestamp_from_datetime( $datetime ) {
+	private function get_timestamp_from_datetime( string $datetime ) : int {
 		$timezone = date_default_timezone_get();
 
 		if ( 'UTC' !== $timezone ) {
